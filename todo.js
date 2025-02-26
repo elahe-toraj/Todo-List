@@ -1,40 +1,47 @@
-const inputBox = document.getElementById("input-box");
-const listContainer = document.getElementById("list-container");
-
-function addTask(){
-    if(inputBox.value === ''){
-        alert("youmust write something!");
+const DATA = [
+    { text: "running", completed: false },
+    { text: "reading book", completed: false }
+];
+  
+const btn = document.querySelector("button");
+const input = document.querySelector("input");
+const ul = document.querySelector("ul");
+  
+const handleAddTodo = () => {
+    const value = input.value.trim();
+    if (value === '') {
+      alert("You must write something!");
+      return;
     }
-
-    else{
-        let li = document.createElement("li");
-        li.innerHTML = inputBox.value;
-        listContainer.appendChild(li);
-        let span= document.createElement("span");
-        span.innerHTML = "\u00d7";
-        li.appendChild(span);
+    DATA.push({ text: value, completed: false });
+    render();
+    input.value = "";
+};
+  
+const handleDelete = (itemIndex) => {
+    DATA.splice(itemIndex, 1);
+    render();
+};
+  
+const render = () => {
+    const template = DATA.map((todo, index) => {
+      return `
+        <li class="${todo.completed ? 'checked' : ''}" data-index="${index}">
+          ${todo.text}
+          <span onclick='handleDelete(${index})'>&times;</span>
+        </li>
+      `;
+    });
+    ul.innerHTML = template.join("");
+};
+ul.addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+      const li = e.target;
+      const index = li.dataset.index;
+      DATA[index].completed = !DATA[index].completed;  
+      render();
     }
-
-    inputBox.value = "";
-    saveData();
-}
-
-listContainer.addEventListener("click",function(e){
-    if(e.target.tagName === "LI"){
-        e.target.classList.toggle("checked");
-        saveData();
-    }
-    else if(e.target.tagName === "SPAN"){
-        e.target.parentElement.remove();
-        saveData();
-    }
-},false);
-
-function saveData() {
-    localStorage.setItem("data", listContainer.innerHTML);
-}
-
-function showTask(){
-    listContainer.innerHTML = localStorage.getItem("data");
-}
-showTask();
+});
+btn.addEventListener("click", handleAddTodo);
+window.addEventListener("load", render);
+  
